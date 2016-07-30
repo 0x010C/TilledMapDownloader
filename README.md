@@ -4,7 +4,7 @@ TilledMapDownloader is a python script that download and put together some given
 ### Usage
 It takes the following parameters :
 * `--url "my.url"` _(required)_  
-used to define the url pattern to get the tiles. There are 3 magic words that should be included in the url:
+used to define the url pattern to get the tiles. There are 3 placeholders that should be included in the url:
   1. `___x___` to mark the location of x in the query
   2. `___y___` to mark the location of y in the query
   3. `___zoom___` to mark the location of the zoom level in the query (if relevant)
