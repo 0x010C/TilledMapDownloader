@@ -15,7 +15,6 @@ from subprocess import call
 
 #Parameters
 base_url = ""
-zoom_level = 0
 min_x = 0
 max_x = 0
 min_y = 0
@@ -35,12 +34,11 @@ class TilesGenerator():
         self.daemon = True
         self.x = min_x-1
         self.y = min_y
-        self.zoom_level = zoom_level
         self.index = 0
     
     def get_next(self):
         while True:
-            if self.zoom_level == None:
+            if self.x == None or self.y == None:
                 break
             elif self.x < max_x:
                 self.x = self.x+1
@@ -56,47 +54,48 @@ class TilesGenerator():
             else:
                 self.x = None
                 self.y = None
-                self.zoom_level = None
                 break
             
-            if not os.path.exists(directory+str(self.zoom_level)+"/"+str(self.y)+"/"+str(self.x)+".jpg"):
+            if not os.path.exists(directory+"tiles/"+str(self.y)+"/"+str(self.x)+".jpg"):
                 break
         
-        return (self.index, self.x, self.y, self.zoom_level)
+        return (self.index, self.x, self.y)
 
 class TilesDownloader(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.__stop__ = False
+    
     def run(self):
         global tiles_generator
         while not self.__stop__:
             with lock:
-                (i, x, y, zoom_level) = tiles_generator.get_next()
-            if zoom_level == None:
+                (i, x, y) = tiles_generator.get_next()
+            if x == None or y == None:
                 break
 			
-            get_tile(x, y, zoom_level)
+            get_tile(x, y)
+    
     def stop(self):
         self.__stop__ = True
 
-def get_tile(x, y, zoom_level):
-    url = base_url.replace("___zoom___", str(zoom_level)).replace("___y___", str(y)).replace("___x___", str(x))
+def get_tile(x, y):
+    url = base_url.replace("___y___", str(y)).replace("___x___", str(x))
     response = requests.get(url, stream=True)
-    with open(directory+str(zoom_level)+'/'+str(y)+'/'+str(x)+'.jpg', 'wb') as out_file:
+    with open(directory+'tiles/'+str(y)+'/'+str(x)+'.jpg', 'wb') as out_file:
         shutil.copyfileobj(response.raw, out_file)
     del response
 
 def get_all_tiles():
     global tiles_generator
     i = 0
-    directory_zl = directory + str(zoom_level) + "/"
-    if not os.path.exists(directory_zl):
-        os.makedirs(directory_zl)
+    directory_tiles = directory + "tiles/"
+    if not os.path.exists(directory_tiles):
+        os.makedirs(directory_tiles)
     for y in xrange(min_y, max_y+1):
-        directory_zl_y = directory_zl + str(y) + "/"
-        if not os.path.exists(directory_zl_y):
-            os.makedirs(directory_zl_y)
+        directory_tiles_y = directory_tiles + str(y) + "/"
+        if not os.path.exists(directory_tiles_y):
+            os.makedirs(directory_tiles_y)
     
     tiles_generator = TilesGenerator()
     
@@ -128,11 +127,11 @@ def combine():
         combine_x = "montage -mode concatenate -tile "+str(max_x-min_x+1)+"x1 "
         print('\b'*(len(str(max_y-min_y+1))*2+22)+"[{0}/{1}] Pre-concatenation".format(j, max_y-min_y+1), end="")
         for x in xrange(min_x, max_x+1):
-            combine_x += directory+str(zoom_level)+'/'+str(y)+'/'+str(x)+'.jpg '
-        combine_x += directory+str(zoom_level)+'/'+str(y)+'.png'
+            combine_x += directory+'tiles/'+str(y)+'/'+str(x)+'.jpg '
+        combine_x += directory+'tiles/'+str(y)+'.png'
         sys.stdout.flush()
         call(combine_x, shell=True)
-        combine_y += directory+str(zoom_level)+'/'+str(y)+'.png '
+        combine_y += directory+'tiles/'+str(y)+'.png '
     print('\n[0/1] Concatenation', end="")
     sys.stdout.flush()
     combine_y += directory+'out.png'
@@ -149,11 +148,11 @@ def normalize():
             print('\b'*(len(str(nb_total_tiles))*2+22)+"[{0}/{1}] Normalize".format(j, nb_total_tiles), end="")
             sys.stdout.flush()
             try:
-                i = Image.open(directory+str(zoom_level)+'/'+str(y)+'/'+str(x)+'.jpg')
+                i = Image.open(directory+'tiles/'+str(y)+'/'+str(x)+'.jpg')
                 del i
             except IOError:
                 i = Image.new('RGB', (tile_width, tile_height), (255,0,0))
-                i.save(directory+str(zoom_level)+'/'+str(y)+'/'+str(x)+'.jpg')
+                i.save(directory+'tiles/'+str(y)+'/'+str(x)+'.jpg')
     print('')
 
 
@@ -165,14 +164,6 @@ def get_params():
         if len(sys.argv) < index:
             bad_params()
         base_url = sys.argv[index+1].decode("utf-8")
-    else:
-        bad_params()
-    
-    if "-z" in sys.argv:
-        index = sys.argv.index("-z")
-        if len(sys.argv) < index:
-            bad_params()
-        zoom_level = int(sys.argv[index+1].decode("utf-8"))
     else:
         bad_params()
     
