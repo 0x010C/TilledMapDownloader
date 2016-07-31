@@ -19,3 +19,6 @@ set the number `N` of threads to use (default is 4)
 ###Example
     python tilled_map_downloader.py --url http://a.tile.openstreetmap.fr/osmfr/15/___x___/___y___.png -x 17050 17071 -y 11347 11370 -t 8
 This command will download and assemble a map from OpenStreetMap with a zoom level of 15, starting at the uper-left corner of coordinates (17050;11347) and ending at the bottom right corner (17071;11370) using 8 threads.
+
+    python tilled_map_downloader.py --url "https://maps.wikimedia.org/osm-intl/13/___x___/___y___.png" -x 2445 2485 -y 2819 2840 -t 12 -d wm-map/
+This one will process a map from the wikimedia map system, starting at coordinates (2445;2819) and ending at (2485;2840) using 12 threads and storing the output in the subdirectory "wm-map"
