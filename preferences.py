@@ -23,7 +23,7 @@ class Ui_PreferencesDialog(object):
         self.threadsInput = QtWidgets.QSpinBox(PreferencesDialog)
         self.threadsInput.setMinimum(1)
         self.threadsInput.setMaximum(120)
-        self.threadsInput.setProperty("value", 4)
+        self.threadsInput.setProperty("value", 12)
         self.threadsInput.setObjectName("threadsInput")
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.threadsInput)
         self.label_2 = QtWidgets.QLabel(PreferencesDialog)
@@ -40,8 +40,8 @@ class Ui_PreferencesDialog(object):
         self.keepTilesInput.setObjectName("keepTilesInput")
         self.horizontalLayout.addWidget(self.keepTilesInput)
         self.dontKeepTilesInput = QtWidgets.QRadioButton(PreferencesDialog)
-        self.dontKeepTilesInput.setChecked(True)
         self.dontKeepTilesInput.setObjectName("dontKeepTilesInput")
+        self.dontKeepTilesInput.setChecked(True)
         self.horizontalLayout.addWidget(self.dontKeepTilesInput)
         self.formLayout.setLayout(1, QtWidgets.QFormLayout.FieldRole, self.horizontalLayout)
 

@@ -36,16 +36,14 @@ def startProcess(self):
         filename = QtWidgets.QFileDialog.getSaveFileName(None, "TilledMapDownloader", "", "Images (*.png *.jpg *.jpeg)", "", QtWidgets.QFileDialog.DontUseNativeDialog)
         if filename[0]:
             self.startButton.setDisabled(True)
+            filename = os.path.normpath(filename[0])
             if uiPreferences.keepTilesInput.isChecked():
-                directory = "/".join(filename[0].split("/")[:-1])
-                if not os.path.exists(directory):
-                    os.makedirs(directory)
-                directory += "/tiles"
+                directory = os.path.join(os.path.split(filename)[0], "tiles")
                 if not os.path.exists(directory):
                     os.makedirs(directory)
             else:
                 directory = QtCore.QTemporaryDir().path()
-            work = Worker(self.xMinInput.value(), self.xMaxInput.value(), self.yMinInput.value(), self.yMaxInput.value(), self.urlInput.text(), directory, filename[0], self.updateStatus, uiPreferences.threadsInput.value()) #TODO nb_threads
+            work = Worker(self.xMinInput.value(), self.xMaxInput.value(), self.yMinInput.value(), self.yMaxInput.value(), self.urlInput.text(), directory, filename, self.updateStatus, uiPreferences.threadsInput.value())
             self.startButton.setEnabled(True)
 
 

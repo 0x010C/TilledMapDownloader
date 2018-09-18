@@ -58,7 +58,7 @@ class TilesGenerator():
                 self.y = None
                 break
 
-            if not os.path.exists(self.tiles_directory+"/"+str(self.y)+"/"+str(self.x)+".png"):
+            if not os.path.exists(os.path.join(self.tiles_directory, str(self.y), str(self.x)+".png")):
                 break
 
         return (self.index, self.x, self.y)
@@ -81,7 +81,7 @@ class TilesDownloader(threading.Thread):
 
             url = self.base_url.replace("___y___", str(y)).replace("___x___", str(x))
             response = requests.get(url, stream=True)
-            with open(self.tiles_directory+"/"+str(y)+'/'+str(x)+'.png', 'wb') as out_file:
+            with open(os.path.join(self.tiles_directory, str(y), str(x)+'.png'), 'wb') as out_file:
                 shutil.copyfileobj(response.raw, out_file)
             del response
 
@@ -109,23 +109,23 @@ class Worker():
 
     def get_all_tiles(self):
         i = 0
-        for y in xrange(self.min_y, self.max_y+1):
-            tmp_directory_y = self.tmp_directory + "/" + str(y)
+        for y in range(self.min_y, self.max_y+1):
+            tmp_directory_y = os.path.join(self.tmp_directory, str(y))
             if not os.path.exists(tmp_directory_y):
                 os.makedirs(tmp_directory_y)
 
         threads = []
-        for i in xrange(0, self.nb_threads):
+        for i in range(0, self.nb_threads):
             threads.append(TilesDownloader(self.tiles_generator, self.base_url, self.tmp_directory))
             threads[i].start()
 
         try:
-            for i in xrange(0, self.nb_threads):
+            for i in range(0, self.nb_threads):
                 threads[i].join()
         except KeyboardInterrupt:
             self.status_callback(0, 'Processus interompu.')
             sys.stdout.flush()
-            for i in xrange(0, self.nb_threads):
+            for i in range(0, self.nb_threads):
                 threads[i].stop()
                 threads[i].join()
         print('')
@@ -134,18 +134,18 @@ class Worker():
 
     def normalize(self):
         j=0
-        for y in xrange(self.min_y, self.max_y+1):
-            for x in xrange(self.min_x, self.max_x+1):
+        for y in range(self.min_y, self.max_y+1):
+            for x in range(self.min_x, self.max_x+1):
                 j=j+1
                 self.status_callback(0.6+(0.1*j/self.nb_total_tiles), "Vérification des tuiles {0}/{1}".format(j, self.nb_total_tiles))
                 print('\b'*(len(str(self.nb_total_tiles))*2+22)+"[{0}/{1}] Normalize".format(j, self.nb_total_tiles), end="")
                 sys.stdout.flush()
                 try:
-                    i = Image.open(self.tmp_directory+'/'+str(y)+'/'+str(x)+'.png')
+                    i = Image.open(os.path.join(self.tmp_directory, str(y), str(x)+'.png'))
                     del i
                 except IOError:
                     i = Image.new('RGB', (tile_width, tile_height), (255,0,0))
-                    i.save(self.tmp_directory+'/'+str(y)+'/'+str(x)+'.png')
+                    i.save(os.path.join(self.tmp_directory, str(y), str(x)+'.png'))
         print('')
 
 
@@ -153,16 +153,20 @@ class Worker():
     #Combine all the tiles in one single map
     def combine(self):
         x_composites = []
-        for y in xrange(self.min_y, self.max_y+1):
+        for y in range(self.min_y, self.max_y+1):
             self.status_callback(0.7+(0.2*(y-self.min_y+1)/self.max_y-self.min_y+1), "Assemblage préliminaire {0}/{1}".format(y-self.min_y+1, self.max_y-self.min_y+1))
             print('\b'*(len(str(self.max_y-self.min_y+1))*2+22)+"[{0}/{1}] Pre-concatenation".format(y-self.min_y+1, self.max_y-self.min_y+1), end="")
             sys.stdout.flush()
             x_images_path = []
-            for x in xrange(self.min_x, self.max_x+1):
-                x_images_path += [self.tmp_directory+'/'+str(y)+'/'+str(x)+'.png']
-            images = map(Image.open, x_images_path)
-            width = sum(i.size[0] for i in images)
-            height = max(i.size[1] for i in images)
+            for x in range(self.min_x, self.max_x+1):
+                x_images_path += [os.path.join(self.tmp_directory, str(y), str(x)+'.png')]
+            images = list(map(Image.open, x_images_path))
+            
+            width = 0
+            height = 0
+            for i in images:
+                width += i.size[0]
+                height = max(height, i.size[1])
             x_composites += [Image.new("RGBA", (width, height))]
 
             x = 0
@@ -170,7 +174,6 @@ class Worker():
                 x_composites[-1].paste(image, (x, 0))
                 x += image.size[0]
                 image.close()
-
 
         self.status_callback(0.95, "Assemblage final")
         print('\n[0/1] Concatenation', end="")
