@@ -37,10 +37,12 @@ Ui_MainWindow.updateStatus = updateStatus
 
 def startProcess(self):
     if self.urlInput.text() != "":
-        filename = QtWidgets.QFileDialog.getSaveFileName(None, "TilledMapDownloader", "", "Images (*.png *.jpg *.jpeg)", "", QtWidgets.QFileDialog.DontUseNativeDialog)
+        filename = QtWidgets.QFileDialog.getSaveFileName(None, "TilledMapDownloader", "", "Images (*.png *.jpg *.jpeg)", "")
         if filename[0]:
             self.startButton.setDisabled(True)
             self.filename = os.path.normpath(filename[0])
+            if not self.filename.endswith(('.png', '.jpg', '.jpeg')):
+                self.filename += '.png'
             if uiPreferences.keepTilesInput.isChecked():
                 self.directory = os.path.join(os.path.split(self.filename)[0], "tiles")
                 if not os.path.exists(self.directory):
