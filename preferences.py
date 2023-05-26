@@ -13,7 +13,7 @@ class Ui_PreferencesDialog(object):
         PreferencesDialog.setObjectName("PreferencesDialog")
         PreferencesDialog.resize(400, 110)
         PreferencesDialog.setMinimumSize(QtCore.QSize(400, 110))
-        PreferencesDialog.setMaximumSize(QtCore.QSize(400, 110))
+        #PreferencesDialog.setMaximumSize(QtCore.QSize(400, 110))
         PreferencesDialog.setModal(True)
         self.formLayout = QtWidgets.QFormLayout(PreferencesDialog)
         self.formLayout.setObjectName("formLayout")

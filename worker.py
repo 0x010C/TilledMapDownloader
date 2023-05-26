@@ -103,7 +103,11 @@ class TilesDownloader(QtCore.QThread):
             # Update the UI
             with lock:
                 (index, total) = self.tiles_generator.finished()
-            self.progress.emit((0.8*index/total), "Téléchargement des tuiles {0}/{1}".format(index, total))
+            
+            if index < total:
+                self.progress.emit((0.8*index/total), "Téléchargement des tuiles {0}/{1}".format(index, total))
+            else:
+                self.progress.emit(0.8, "Téléchargement des tuiles {0}/{1} terminé".format(index, total))
             print('\b'*(len(str(total))*2+27)+"[{0}/{1}] Download".format(index, total), end="")
 
     def stop(self):

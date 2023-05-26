@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setMinimumSize(QtCore.QSize(700, 300))
-        MainWindow.setMaximumSize(QtCore.QSize(700, 300))
+        #MainWindow.setMaximumSize(QtCore.QSize(700, 300))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_10 = QtWidgets.QHBoxLayout(self.centralwidget)
